@@ -1,3 +1,5 @@
+import '../../domain/entities/pet_entity.dart';
+
 class PetModel {
   final String id;
   final String name;
@@ -38,4 +40,27 @@ class PetModel {
         'isAdopted': isAdopted,
         'isFavorited': isFavorited,
       };
+}
+
+
+extension PetModelMapper on PetModel {
+  PetEntity toEntity() => PetEntity(
+        id: id,
+        name: name,
+        age: age,
+        price: price,
+        imageUrl: imageUrl,
+        isAdopted: isAdopted,
+        isFavorited: isFavorited,
+      );
+
+  static PetModel fromEntity(PetEntity entity) => PetModel(
+        id: entity.id,
+        name: entity.name,
+        age: entity.age,
+        price: entity.price,
+        imageUrl: entity.imageUrl,
+        isAdopted: entity.isAdopted,
+        isFavorited: entity.isFavorited,
+      );
 }
