@@ -55,7 +55,20 @@ class _DetailsPageState extends State<DetailsPage> {
     if (pet == null) return const SizedBox();
 
    return Scaffold(
-  appBar: AppBar(title: Text(pet.name)),
+  appBar: AppBar(
+  title: Text(pet.name),
+  actions: [
+    IconButton(
+      icon: Icon(
+        pet.isFavorited ? Icons.favorite : Icons.favorite_border,
+        color: pet.isFavorited ? Colors.red : null,
+      ),
+      onPressed: () {
+        context.read<PetCubit>().toggleFavorite(pet.id);
+      },
+    ),
+  ],
+),
   body: Stack(
     children: [
       ListView(

@@ -20,7 +20,23 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Pet Adoption")),
+      appBar: AppBar(
+  title: const Text("Pet Adoption"),
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.favorite_border),
+      onPressed: () {
+        Navigator.pushNamed(context, '/favorites');
+      },
+    ),
+    IconButton(
+      icon: const Icon(Icons.history),
+      onPressed: () {
+        Navigator.pushNamed(context, '/history');
+      },
+    ),
+  ],
+),
       body: RefreshIndicator(
         onRefresh: () async {
           context.read<PetCubit>().loadPets();
