@@ -65,4 +65,17 @@ class PetCubit extends Cubit<PetState> {
       emit(PetLoaded(updatedPets));
     }
   }
+
+
+
+  List<PetEntity> getFavoritedPets() {
+  if (state is PetLoaded) {
+    return (state as PetLoaded)
+        .pets
+        .where((pet) => pet.isFavorited)
+        .toList();
+  }
+  return [];
 }
+}
+
