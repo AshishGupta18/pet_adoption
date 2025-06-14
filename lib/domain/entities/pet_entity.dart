@@ -19,6 +19,26 @@ class PetEntity extends Equatable {
     this.isFavorited = false,
   });
 
+  PetEntity copyWith({
+    String? id,
+    String? name,
+    int? age,
+    double? price,
+    String? imageUrl,
+    bool? isAdopted,
+    bool? isFavorited,
+  }) {
+    return PetEntity(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      age: age ?? this.age,
+      price: price ?? this.price,
+      imageUrl: imageUrl ?? this.imageUrl,
+      isAdopted: isAdopted ?? this.isAdopted,
+      isFavorited: isFavorited ?? this.isFavorited,
+    );
+  }
+
   @override
   List<Object?> get props =>
       [id, name, age, price, imageUrl, isAdopted, isFavorited];

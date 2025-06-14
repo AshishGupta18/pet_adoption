@@ -20,4 +20,49 @@ class PetCubit extends Cubit<PetState> {
       emit(PetError("Failed to load pets: $e"));
     }
   }
+
+  /// ✅ Get a specific pet by ID
+  PetEntity? getPetById(String id) {
+    if (state is PetLoaded) {
+      final pets = (state as PetLoaded).pets;
+      try {
+        return pets.firstWhere((pet) => pet.id == id);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// ✅ Mark a pet as adopted
+  void adoptPet(String id) {
+    if (state is PetLoaded) {
+      final pets = (state as PetLoaded).pets;
+
+      final updatedPets = pets.map((pet) {
+        if (pet.id == id) {
+          return pet.copyWith(isAdopted: true);
+        }
+        return pet;
+      }).toList();
+
+      emit(PetLoaded(updatedPets));
+    }
+  }
+
+  /// ✅ Toggle pet's favorite status
+  void toggleFavorite(String id) {
+    if (state is PetLoaded) {
+      final pets = (state as PetLoaded).pets;
+
+      final updatedPets = pets.map((pet) {
+        if (pet.id == id) {
+          return pet.copyWith(isFavorited: !pet.isFavorited);
+        }
+        return pet;
+      }).toList();
+
+      emit(PetLoaded(updatedPets));
+    }
+  }
 }
