@@ -146,6 +146,7 @@ class _HomePageState extends State<HomePage> {
             return RefreshIndicator(
               onRefresh: () async {
                 await context.read<PetCubit>().refreshPets();
+                
               },
               child: Column(
                 children: [
