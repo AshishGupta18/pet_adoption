@@ -36,6 +36,10 @@ class PetGridTile extends StatelessWidget {
                     imageUrl: pet.imageUrl,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    memCacheWidth: 300,
+                    memCacheHeight: 300,
+                    maxWidthDiskCache: 300,
+                    maxHeightDiskCache: 300,
                     placeholder:
                         (context, url) => Container(
                           color: Theme.of(context).colorScheme.surface,
@@ -46,7 +50,24 @@ class PetGridTile extends StatelessWidget {
                     errorWidget:
                         (context, url, error) => Container(
                           color: Theme.of(context).colorScheme.errorContainer,
-                          child: const Center(child: Icon(Icons.error)),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.pets,
+                                size: 40,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Image not available',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                   ),
                 ),

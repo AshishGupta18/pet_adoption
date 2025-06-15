@@ -7,6 +7,8 @@ import 'presentation/blocs/theme_cubit/theme_cubit.dart';
 import 'data/datasources/mock_pet_data.dart';
 import 'data/repositories/pet_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'data/services/petfinder_service.dart';
+import 'presentation/pages/home/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +26,7 @@ class PetAdoptionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create:
-              (_) =>
-                  PetCubit(PetRepositoryImpl(dataSource: MockPetDataSource()))
-                    ..loadPets(),
-        ),
+        BlocProvider(create: (_) => PetCubit(PetfinderService())..loadPets()),
         BlocProvider(create: (_) => ThemeCubit(prefs)),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(

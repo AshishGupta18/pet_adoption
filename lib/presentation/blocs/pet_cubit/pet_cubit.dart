@@ -1,73 +1,72 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../data/services/petfinder_service.dart';
 import '../../../domain/entities/pet_entity.dart';
-import '../../../domain/repositories/pet_repository.dart';
-import 'package:pet_adoption/data/models/pet_model.dart';
 
 part 'pet_state.dart';
 
 class PetCubit extends Cubit<PetState> {
-  final PetRepository repository;
-  static const int _pageSize = 10;
-  int _currentPage = 0;
-  bool _hasMore = true;
+  final PetfinderService _petfinderService;
+  int _currentPage = 1;
+  bool _hasMorePets = true;
+  bool _isLoading = false;
+  static const int _pageSize = 20;
 
-  PetCubit(this.repository) : super(PetInitial());
+  PetCubit(this._petfinderService) : super(PetInitial());
 
   Future<void> loadPets() async {
+    if (_isLoading) return;
+
+    _isLoading = true;
     emit(PetLoading());
-    _currentPage = 0;
-    _hasMore = true;
 
     try {
-      final pets = await repository.getAllPets();
-      final prefs = await SharedPreferences.getInstance();
-      final adoptedIds = prefs.getStringList('adopted') ?? [];
-      final favoritedIds = prefs.getStringList('favorited') ?? [];
-
-      final updatedPets =
-          pets.map((pet) {
-            return pet.toEntity().copyWith(
-              isAdopted: adoptedIds.contains(pet.id),
-              isFavorited: favoritedIds.contains(pet.id),
-            );
-          }).toList();
-
-      emit(PetLoaded(updatedPets));
+      final pets = await _petfinderService.getPets(
+        page: _currentPage,
+        limit: _pageSize,
+      );
+      if (pets.isEmpty) {
+        _hasMorePets = false;
+        emit(PetLoaded([]));
+      } else {
+        emit(PetLoaded(pets));
+        _currentPage++;
+      }
     } catch (e) {
       emit(PetError("Failed to load pets: $e"));
+    } finally {
+      _isLoading = false;
     }
   }
 
+  Future<void> refreshPets() async {
+    _currentPage = 1;
+    _hasMorePets = true;
+    await loadPets();
+  }
+
   Future<void> loadMorePets() async {
-    if (!_hasMore) return;
+    if (!_hasMorePets || _isLoading) return;
 
     if (state is PetLoaded) {
+      _isLoading = true;
       final currentPets = (state as PetLoaded).pets;
-      _currentPage++;
 
       try {
-        final newPets = await repository.getPetsPage(_currentPage, _pageSize);
+        final newPets = await _petfinderService.getPets(
+          page: _currentPage,
+          limit: _pageSize,
+        );
         if (newPets.isEmpty) {
-          _hasMore = false;
+          _hasMorePets = false;
           return;
         }
 
-        final prefs = await SharedPreferences.getInstance();
-        final adoptedIds = prefs.getStringList('adopted') ?? [];
-        final favoritedIds = prefs.getStringList('favorited') ?? [];
-
-        final updatedNewPets =
-            newPets.map((pet) {
-              return pet.toEntity().copyWith(
-                isAdopted: adoptedIds.contains(pet.id),
-                isFavorited: favoritedIds.contains(pet.id),
-              );
-            }).toList();
-
-        emit(PetLoaded([...currentPets, ...updatedNewPets]));
+        emit(PetLoaded([...currentPets, ...newPets]));
+        _currentPage++;
       } catch (e) {
         emit(PetError("Failed to load more pets: $e"));
+      } finally {
+        _isLoading = false;
       }
     }
   }
@@ -78,7 +77,7 @@ class PetCubit extends Cubit<PetState> {
       final pets = (state as PetLoaded).pets;
       try {
         return pets.firstWhere((pet) => pet.id == id);
-      } catch (_) {
+      } catch (e) {
         return null;
       }
     }
@@ -86,10 +85,9 @@ class PetCubit extends Cubit<PetState> {
   }
 
   /// ✅ Mark a pet as adopted
-  void adoptPet(String id) async {
+  void adoptPet(String id) {
     if (state is PetLoaded) {
       final pets = (state as PetLoaded).pets;
-
       final updatedPets =
           pets.map((pet) {
             if (pet.id == id) {
@@ -97,25 +95,14 @@ class PetCubit extends Cubit<PetState> {
             }
             return pet;
           }).toList();
-
       emit(PetLoaded(updatedPets));
-
-      final adoptedIds =
-          updatedPets
-              .where((pet) => pet.isAdopted)
-              .map((pet) => pet.id)
-              .toList();
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('adopted', adoptedIds);
     }
   }
 
   /// ✅ Toggle pet's favorite status
-  void toggleFavorite(String id) async {
+  void toggleFavorite(String id) {
     if (state is PetLoaded) {
       final pets = (state as PetLoaded).pets;
-
       final updatedPets =
           pets.map((pet) {
             if (pet.id == id) {
@@ -123,17 +110,7 @@ class PetCubit extends Cubit<PetState> {
             }
             return pet;
           }).toList();
-
       emit(PetLoaded(updatedPets));
-
-      final favoritedIds =
-          updatedPets
-              .where((pet) => pet.isFavorited)
-              .map((pet) => pet.id)
-              .toList();
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('favorited', favoritedIds);
     }
   }
 
@@ -152,4 +129,7 @@ class PetCubit extends Cubit<PetState> {
     }
     return [];
   }
+
+  bool get hasMorePets => _hasMorePets;
+  bool get isLoading => _isLoading;
 }

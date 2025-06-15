@@ -93,18 +93,37 @@ class _DetailsPageState extends State<DetailsPage> {
                     child: CachedNetworkImage(
                       imageUrl: pet.imageUrl,
                       fit: BoxFit.cover,
-                      placeholder:
-                          (context, url) => Container(
-                            color: Theme.of(context).colorScheme.surface,
-                            child: const Center(
-                              child: CircularProgressIndicator(),
+                      memCacheWidth: 600,
+                      memCacheHeight: 600,
+                      maxWidthDiskCache: 600,
+                      maxHeightDiskCache: 600,
+                      placeholder: (context, url) => Container(
+                        color: Theme.of(context).colorScheme.surface,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.pets,
+                              size: 80,
+                              color: Theme.of(context).colorScheme.error,
                             ),
-                          ),
-                      errorWidget:
-                          (context, url, error) => Container(
-                            color: Theme.of(context).colorScheme.errorContainer,
-                            child: const Center(child: Icon(Icons.error)),
-                          ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Image not available',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

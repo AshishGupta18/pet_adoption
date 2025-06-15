@@ -6,6 +6,7 @@ import '../../../presentation/pages/home/widgets/error_widget.dart' as custom;
 import 'widgets/pet_grid_tile.dart';
 import 'widgets/search_bar.dart';
 import '../../../domain/entities/pet_entity.dart';
+import 'widgets/pet_grid.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -92,36 +93,69 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(context, '/history');
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              context.read<PetCubit>().refreshPets();
+            },
+          ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() => _currentPage = 0);
-          context.read<PetCubit>().loadPets();
-        },
-        child: BlocBuilder<PetCubit, PetState>(
-          builder: (context, state) {
-            if (state is PetLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is PetError) {
-              return custom.ErrorWidget(message: state.message);
-            } else if (state is PetLoaded) {
-              allPets = state.pets;
-              final filteredPets =
-                  searchQuery.isEmpty
-                      ? allPets
-                      : allPets
-                          .where(
-                            (pet) => pet.name.toLowerCase().contains(
-                              searchQuery.toLowerCase(),
-                            ),
-                          )
-                          .toList();
+      body: BlocBuilder<PetCubit, PetState>(
+        builder: (context, state) {
+          if (state is PetInitial) {
+            context.read<PetCubit>().loadPets();
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              final currentPagePets = _getCurrentPagePets(filteredPets);
-              final totalPages = _getTotalPages(filteredPets);
+          if (state is PetLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              return Column(
+          if (state is PetError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    state.message,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<PetCubit>().refreshPets();
+                    },
+                    child: const Text('Try Again'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is PetLoaded) {
+            allPets = state.pets;
+            final filteredPets =
+                searchQuery.isEmpty
+                    ? allPets
+                    : allPets
+                        .where(
+                          (pet) => pet.name.toLowerCase().contains(
+                            searchQuery.toLowerCase(),
+                          ),
+                        )
+                        .toList();
+
+            final currentPagePets = _getCurrentPagePets(filteredPets);
+            final totalPages = _getTotalPages(filteredPets);
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                await context.read<PetCubit>().refreshPets();
+              },
+              child: Column(
                 children: [
                   SearchBarWidget(
                     onChanged: (value) {
@@ -198,11 +232,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ],
-              );
-            }
-            return const SizedBox();
-          },
-        ),
+              ),
+            );
+          }
+          return const SizedBox();
+        },
       ),
     );
   }
