@@ -28,7 +28,7 @@ class PetAdoptionApp extends StatelessWidget {
         BlocProvider(
           create:
               (_) =>
-                  PetCubit(PetfinderRepositoryImpl(PetfinderService()))
+                  PetCubit(PetfinderRepositoryImpl(PetfinderService()), prefs)
                     ..loadPets(),
         ),
         BlocProvider(create: (_) => ThemeCubit(prefs)),

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pet_adoption/presentation/blocs/pet_cubit/pet_cubit.dart';
 import 'package:pet_adoption/data/repositories/petfinder_repository_impl.dart';
 import 'package:pet_adoption/data/services/petfinder_service.dart';
@@ -14,10 +15,13 @@ void main() {
   group('PetCubit', () {
     late PetCubit petCubit;
     late MockPetfinderService mockService;
+    late SharedPreferences prefs;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
       mockService = MockPetfinderService();
-      petCubit = PetCubit(PetfinderRepositoryImpl(mockService));
+      petCubit = PetCubit(PetfinderRepositoryImpl(mockService), prefs);
     });
 
     tearDown(() {
