@@ -30,12 +30,14 @@ class PetCubit extends Cubit<PetState> {
         emit(PetLoaded([]));
       } else {
         final adoptedIds = _getAdoptedPetIds();
+        final favoriteIds = _getFavoritePetIds();
         emit(
           PetLoaded(
             pets
                 .map(
                   (model) => model.toEntity().copyWith(
                     isAdopted: adoptedIds.contains(model.id),
+                    isFavorited: favoriteIds.contains(model.id),
                   ),
                 )
                 .toList(),
@@ -128,10 +130,22 @@ class PetCubit extends Cubit<PetState> {
       final updatedPets =
           pets.map((pet) {
             if (pet.id == id) {
-              return pet.copyWith(isFavorited: !pet.isFavorited);
+              final updatedPet = pet.copyWith(isFavorited: !pet.isFavorited);
+              // Update SharedPreferences
+              final favoriteIds = _getFavoritePetIds();
+              if (updatedPet.isFavorited) {
+                if (!favoriteIds.contains(id)) {
+                  favoriteIds.add(id);
+                }
+              } else {
+                favoriteIds.remove(id);
+              }
+              _prefs.setStringList('favorite_pets', favoriteIds);
+              return updatedPet;
             }
             return pet;
           }).toList();
+
       emit(PetLoaded(updatedPets));
     }
   }
@@ -165,6 +179,26 @@ class PetCubit extends Cubit<PetState> {
     if (!ids.contains(id)) {
       ids.add(id);
       _prefs.setStringList(_adoptedKey, ids);
+    }
+  }
+
+  List<String> _getFavoritePetIds() {
+    return _prefs.getStringList('favorite_pets') ?? [];
+  }
+
+  void _saveFavoritePetId(String id) {
+    final ids = _getFavoritePetIds();
+    if (state is PetLoaded) {
+      final pets = (state as PetLoaded).pets;
+      final pet = pets.firstWhere((p) => p.id == id);
+      if (pet.isFavorited) {
+        if (!ids.contains(id)) {
+          ids.add(id);
+        }
+      } else {
+        ids.remove(id);
+      }
+      _prefs.setStringList('favorite_pets', ids);
     }
   }
 }
