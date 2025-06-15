@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:confetti/confetti.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../domain/entities/pet_entity.dart';
 import '../../../presentation/blocs/pet_cubit/pet_cubit.dart';
 import '../../../presentation/pages/home/widgets/adopt_button.dart';
@@ -35,7 +36,7 @@ class _DetailsPageState extends State<DetailsPage> {
         context: context,
         builder:
             (_) => AlertDialog(
-              title: const Text('Adopted!'),
+              title: const Text('Adopted! 🎉'),
               content: Text("You've now adopted ${widget.pet.name}"),
               actions: [
                 TextButton(
@@ -63,22 +64,49 @@ class _DetailsPageState extends State<DetailsPage> {
             expandedHeight: 300,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => ImageViewerPage(
-                            imageUrl: pet.imageUrl,
-                            tag: pet.id,
+              background: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => ImageViewerPage(
+                              imageUrl: pet.imageUrl,
+                              tag: pet.id,
+                            ),
+                      ),
+                    );
+                  },
+                  child: Hero(
+                    tag: pet.id,
+                    child: CachedNetworkImage(
+                      imageUrl: pet.imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder:
+                          (context, url) => Container(
+                            color: Theme.of(context).colorScheme.surface,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Container(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            child: const Center(child: Icon(Icons.error)),
                           ),
                     ),
-                  );
-                },
-                child: Hero(
-                  tag: pet.id,
-                  child: Image.network(pet.imageUrl, fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -100,16 +128,57 @@ class _DetailsPageState extends State<DetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    pet.name,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          pet.name,
+                          style: Theme.of(context).textTheme.headlineMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      if (pet.isAdopted)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.green.withOpacity(0.5),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Adopted',
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
                           _buildInfoRow(
@@ -118,7 +187,7 @@ class _DetailsPageState extends State<DetailsPage> {
                             '${pet.age} years',
                             Icons.cake,
                           ),
-                          const Divider(),
+                          const Divider(height: 32),
                           _buildInfoRow(
                             context,
                             'Price',
@@ -129,10 +198,12 @@ class _DetailsPageState extends State<DetailsPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  AdoptButton(
-                    isAdopted: pet.isAdopted,
-                    onPressed: _handleAdoption,
+                  const SizedBox(height: 40),
+                  Center(
+                    child: AdoptButton(
+                      isAdopted: pet.isAdopted,
+                      onPressed: _handleAdoption,
+                    ),
                   ),
                 ],
               ),
@@ -157,27 +228,42 @@ class _DetailsPageState extends State<DetailsPage> {
     String value,
     IconData icon,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 16),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 24,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

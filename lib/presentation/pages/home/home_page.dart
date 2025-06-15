@@ -19,6 +19,8 @@ class _HomePageState extends State<HomePage> {
   String searchQuery = '';
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
+  int _currentPage = 0;
+  static const int _petsPerPage = 10;
 
   @override
   void initState() {
@@ -47,22 +49,37 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  List<PetEntity> _getCurrentPagePets(List<PetEntity> pets) {
+    final startIndex = _currentPage * _petsPerPage;
+    final endIndex = startIndex + _petsPerPage;
+    return pets.length > startIndex
+        ? pets.sublist(
+          startIndex,
+          endIndex > pets.length ? pets.length : endIndex,
+        )
+        : [];
+  }
+
+  int _getTotalPages(List<PetEntity> pets) {
+    return (pets.length / _petsPerPage).ceil();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Pet Adoption"),
-        actions: [
-          IconButton(
-            icon: Icon(
-              context.watch<ThemeCubit>().state.isDarkMode
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            onPressed: () {
-              context.read<ThemeCubit>().toggleTheme();
-            },
+        leading: IconButton(
+          icon: Icon(
+            context.watch<ThemeCubit>().state.isDarkMode
+                ? Icons.light_mode
+                : Icons.dark_mode,
           ),
+          onPressed: () {
+            context.read<ThemeCubit>().toggleTheme();
+          },
+        ),
+        actions: [
           IconButton(
             icon: const Icon(Icons.favorite_border),
             onPressed: () {
@@ -79,6 +96,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
+          setState(() => _currentPage = 0);
           context.read<PetCubit>().loadPets();
         },
         child: BlocBuilder<PetCubit, PetState>(
@@ -100,31 +118,83 @@ class _HomePageState extends State<HomePage> {
                           )
                           .toList();
 
+              final currentPagePets = _getCurrentPagePets(filteredPets);
+              final totalPages = _getTotalPages(filteredPets);
+
               return Column(
                 children: [
                   SearchBarWidget(
-                    onChanged: (value) => setState(() => searchQuery = value),
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value;
+                        _currentPage = 0;
+                      });
+                    },
                   ),
                   Expanded(
-                    child: GridView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.75,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: GridView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.all(12),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 0.75,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                ),
+                            itemCount:
+                                currentPagePets.length +
+                                (_isLoadingMore ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == currentPagePets.length) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return PetGridTile(pet: currentPagePets[index]);
+                            },
                           ),
-                      itemCount: filteredPets.length + (_isLoadingMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index == filteredPets.length) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        return PetGridTile(pet: filteredPets[index]);
-                      },
+                        ),
+                        if (totalPages > 1)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.chevron_left),
+                                  onPressed:
+                                      _currentPage > 0
+                                          ? () {
+                                            setState(() {
+                                              _currentPage--;
+                                            });
+                                          }
+                                          : null,
+                                ),
+                                Text(
+                                  'Page ${_currentPage + 1} of $totalPages',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.chevron_right),
+                                  onPressed:
+                                      _currentPage < totalPages - 1
+                                          ? () {
+                                            setState(() {
+                                              _currentPage++;
+                                            });
+                                          }
+                                          : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],

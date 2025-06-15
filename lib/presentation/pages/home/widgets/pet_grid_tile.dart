@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../domain/entities/pet_entity.dart';
 import '../../../routes/app_routes.dart';
 
@@ -31,10 +32,22 @@ class PetGridTile extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: Image.network(
-                    pet.imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: pet.imageUrl,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    placeholder:
+                        (context, url) => Container(
+                          color: Theme.of(context).colorScheme.surface,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                    errorWidget:
+                        (context, url, error) => Container(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          child: const Center(child: Icon(Icons.error)),
+                        ),
                   ),
                 ),
               ),
