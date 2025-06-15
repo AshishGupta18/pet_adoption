@@ -40,7 +40,7 @@ class PetAdoptionApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            initialRoute: AppRoutes.home,
+            initialRoute: AppRoutes.splash,
             onGenerateRoute: AppRoutes.generate,
           );
         },
