@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:confetti/confetti.dart';
 import '../../../domain/entities/pet_entity.dart';
 import '../../../presentation/blocs/pet_cubit/pet_cubit.dart';

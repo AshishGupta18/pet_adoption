@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pet_adoption/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Pet list displays correctly', (WidgetTester tester) async {
     // Create a mock SharedPreferences instance
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -19,16 +19,20 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(PetAdoptionApp(prefs: prefs));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Wait for the initial frame to complete
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Verify that the pet list is displayed
+    expect(find.byType(ListView), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that pet items are displayed
+    expect(find.byType(Card), findsWidgets);
+
+    // Verify that pet details are shown
+    expect(find.byType(Text), findsWidgets);
+
+    // Verify that the app bar is present
+    expect(find.byType(AppBar), findsOneWidget);
+    expect(find.text('Pet Adoption'), findsOneWidget);
   });
 }
