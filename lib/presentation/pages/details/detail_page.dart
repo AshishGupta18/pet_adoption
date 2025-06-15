@@ -97,33 +97,16 @@ class _DetailsPageState extends State<DetailsPage> {
                       memCacheHeight: 600,
                       maxWidthDiskCache: 600,
                       maxHeightDiskCache: 600,
-                      placeholder: (context, url) => Container(
-                        color: Theme.of(context).colorScheme.surface,
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.pets,
-                              size: 80,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Image not available',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      placeholder:
+                          (context, url) => Image.asset(
+                            'assets/icons/placeholder_image.png',
+                            fit: BoxFit.cover,
+                          ),
+                      errorWidget:
+                          (context, url, error) => Image.asset(
+                            'assets/icons/placeholder_image.png',
+                            fit: BoxFit.cover,
+                          ),
                     ),
                   ),
                 ),

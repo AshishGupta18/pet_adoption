@@ -1,17 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../data/services/petfinder_service.dart';
+import '../../../domain/repositories/pet_repository.dart';
 import '../../../domain/entities/pet_entity.dart';
+import '../../../data/models/pet_model.dart';
 
 part 'pet_state.dart';
 
 class PetCubit extends Cubit<PetState> {
-  final PetfinderService _petfinderService;
+  final PetRepository _petRepository;
   int _currentPage = 1;
   bool _hasMorePets = true;
   bool _isLoading = false;
   static const int _pageSize = 20;
 
-  PetCubit(this._petfinderService) : super(PetInitial());
+  PetCubit(this._petRepository) : super(PetInitial());
 
   Future<void> loadPets() async {
     if (_isLoading) return;
@@ -20,15 +21,12 @@ class PetCubit extends Cubit<PetState> {
     emit(PetLoading());
 
     try {
-      final pets = await _petfinderService.getPets(
-        page: _currentPage,
-        limit: _pageSize,
-      );
+      final pets = await _petRepository.getPetsPage(_currentPage, _pageSize);
       if (pets.isEmpty) {
         _hasMorePets = false;
         emit(PetLoaded([]));
       } else {
-        emit(PetLoaded(pets));
+        emit(PetLoaded(pets.map((model) => model.toEntity()).toList()));
         _currentPage++;
       }
     } catch (e) {
@@ -52,16 +50,21 @@ class PetCubit extends Cubit<PetState> {
       final currentPets = (state as PetLoaded).pets;
 
       try {
-        final newPets = await _petfinderService.getPets(
-          page: _currentPage,
-          limit: _pageSize,
+        final newPets = await _petRepository.getPetsPage(
+          _currentPage,
+          _pageSize,
         );
         if (newPets.isEmpty) {
           _hasMorePets = false;
           return;
         }
 
-        emit(PetLoaded([...currentPets, ...newPets]));
+        emit(
+          PetLoaded([
+            ...currentPets,
+            ...newPets.map((model) => model.toEntity()),
+          ]),
+        );
         _currentPage++;
       } catch (e) {
         emit(PetError("Failed to load more pets: $e"));

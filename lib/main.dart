@@ -6,6 +6,7 @@ import 'presentation/blocs/pet_cubit/pet_cubit.dart';
 import 'presentation/blocs/theme_cubit/theme_cubit.dart';
 import 'data/datasources/mock_pet_data.dart';
 import 'data/repositories/pet_repository_impl.dart';
+import 'data/repositories/petfinder_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/services/petfinder_service.dart';
 import 'presentation/pages/home/home_page.dart';
@@ -26,7 +27,12 @@ class PetAdoptionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => PetCubit(PetfinderService())..loadPets()),
+        BlocProvider(
+          create:
+              (_) =>
+                  PetCubit(PetfinderRepositoryImpl(PetfinderService()))
+                    ..loadPets(),
+        ),
         BlocProvider(create: (_) => ThemeCubit(prefs)),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(

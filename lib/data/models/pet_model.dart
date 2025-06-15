@@ -31,36 +31,37 @@ class PetModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'age': age,
-        'price': price,
-        'imageUrl': imageUrl,
-        'isAdopted': isAdopted,
-        'isFavorited': isFavorited,
-      };
-}
+  factory PetModel.fromEntity(PetEntity entity) {
+    return PetModel(
+      id: entity.id,
+      name: entity.name,
+      age: entity.age,
+      price: entity.price,
+      imageUrl: entity.imageUrl,
+      isAdopted: entity.isAdopted,
+      isFavorited: entity.isFavorited,
+    );
+  }
 
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'age': age,
+    'price': price,
+    'imageUrl': imageUrl,
+    'isAdopted': isAdopted,
+    'isFavorited': isFavorited,
+  };
+}
 
 extension PetModelMapper on PetModel {
   PetEntity toEntity() => PetEntity(
-        id: id,
-        name: name,
-        age: age,
-        price: price,
-        imageUrl: imageUrl,
-        isAdopted: isAdopted,
-        isFavorited: isFavorited,
-      );
-
-  static PetModel fromEntity(PetEntity entity) => PetModel(
-        id: entity.id,
-        name: entity.name,
-        age: entity.age,
-        price: entity.price,
-        imageUrl: entity.imageUrl,
-        isAdopted: entity.isAdopted,
-        isFavorited: entity.isFavorited,
-      );
+    id: id,
+    name: name,
+    age: age,
+    price: price,
+    imageUrl: imageUrl,
+    isAdopted: isAdopted,
+    isFavorited: isFavorited,
+  );
 }
