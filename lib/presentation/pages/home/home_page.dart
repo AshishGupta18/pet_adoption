@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../presentation/blocs/pet_cubit/pet_cubit.dart';
 import '../../../presentation/blocs/theme_cubit/theme_cubit.dart';
-import '../../../presentation/pages/home/widgets/error_widget.dart' as custom;
 import 'widgets/pet_grid_tile.dart';
 import 'widgets/search_bar.dart';
 import '../../../domain/entities/pet_entity.dart';
-import 'widgets/pet_grid.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -91,12 +89,6 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.history),
             onPressed: () {
               Navigator.pushNamed(context, '/history');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<PetCubit>().refreshPets();
             },
           ),
         ],

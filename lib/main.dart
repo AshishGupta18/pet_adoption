@@ -4,8 +4,6 @@ import 'core/themes/app_theme.dart';
 import 'presentation/routes/app_routes.dart';
 import 'presentation/blocs/pet_cubit/pet_cubit.dart';
 import 'presentation/blocs/theme_cubit/theme_cubit.dart';
-import 'data/datasources/mock_pet_data.dart';
-import 'data/repositories/pet_repository_impl.dart';
 import 'data/repositories/petfinder_repository_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/services/petfinder_service.dart';
