@@ -11,4 +11,18 @@ class PetRepositoryImpl implements PetRepository {
   Future<List<PetModel>> getAllPets() {
     return dataSource.fetchPets();
   }
+
+  @override
+  Future<List<PetModel>> getPetsPage(int page, int pageSize) async {
+    final allPets = await dataSource.fetchPets();
+    final startIndex = page * pageSize;
+    if (startIndex >= allPets.length) {
+      return [];
+    }
+    final endIndex =
+        (startIndex + pageSize) > allPets.length
+            ? allPets.length
+            : startIndex + pageSize;
+    return allPets.sublist(startIndex, endIndex);
+  }
 }

@@ -24,11 +24,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.5
+  flutter_bloc: ^9.1.1
   equatable: ^2.0.5
   http: ^1.1.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   path_provider: ^2.1.5
   photo_view: ^0.15.0
   confetti: ^0.6.0
@@ -42,7 +40,6 @@ dev_dependencies:
     sdk: flutter
   bloc_test: ^10.0.0
   mockito: ^5.4.6
-  flutter_bloc_test: ^0.1.0
   flutter_lints: ^5.0.0
 
 flutter:

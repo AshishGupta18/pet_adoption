@@ -14,11 +14,24 @@ class AdoptButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: isAdopted ? null : onPressed,
-      icon: const Icon(Icons.pets),
-      label: Text(isAdopted ? 'Already Adopted' : 'Adopt Me'),
+      icon: Icon(
+        isAdopted ? Icons.check_circle : Icons.pets,
+        color: isAdopted ? Colors.grey : Colors.white,
+      ),
+      label: Text(
+        isAdopted ? 'Already Adopted' : 'Adopt Me',
+        style: TextStyle(
+          color: isAdopted ? Colors.grey : Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        backgroundColor: isAdopted ? Colors.grey : Colors.green,
+        backgroundColor:
+            isAdopted
+                ? Colors.grey[300]
+                : Theme.of(context).colorScheme.primary,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
